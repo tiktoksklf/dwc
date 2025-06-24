@@ -1,9 +1,8 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>DWC / Admin Panel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&amp;display=swap" rel="stylesheet">
   <style>
     body {
       background-color: black;
@@ -85,31 +84,35 @@
       font-weight: bold;
       color: #ccc;
     }
-
-    #addAccountBtn {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-    }
   </style>
 </head>
 <body>
   <h1>░▒▓█ ADMIN PANEL █▓▒░</h1>
 
   <label for="tokenSelect">GitHub Account Token:</label>
-  <select id="tokenSelect"></select>
+  <select id="tokenSelect">
+    <option value="0">Account 1 - github...</option>
+    <option value="1">Account 2 - github...</option>
+  </select>
   <button id="addAccountBtn">Add New Token</button>
 
   <label for="displayName">Scammer Display Name:</label>
-  <input type="text" id="displayName" placeholder="e.g. austin" />
+  <input type="text" id="displayName" placeholder="e.g. austin">
 
-  <label for="username">Scammer Username (@handle):</label>
-  <input type="text" id="username" placeholder="e.g. @uncarve" />
+  <label for="tiktokUser">TikTok User (@handle):</label>
+  <input type="text" id="tiktokUser" placeholder="e.g. @uncarve">
+
+  <label for="instagramUser">Instagram User (@handle):</label>
+  <input type="text" id="instagramUser" placeholder="e.g. @uncarve">
+
+  <label for="telegramUser">Telegram User (@handle):</label>
+  <input type="text" id="telegramUser" placeholder="e.g. @uncarve">
 
   <label for="userId">Scammer ID:</label>
-  <input type="text" id="userId" placeholder="e.g. 7902801228" />
+  <input type="text" id="userId" placeholder="e.g. 7902801228">
 
   <label for="amount">Amount:</label>
-  <input type="text" id="amount" placeholder="e.g. $300" />
+  <input type="text" id="amount" placeholder="e.g. $300">
 
   <label for="description">Description:</label>
   <textarea id="description" placeholder="Describe what they did..."></textarea>
@@ -215,13 +218,22 @@
 
       const token = tokens[tokenSelect.value];
       const displayName = document.getElementById('displayName').value.trim();
-      const username = document.getElementById('username').value.trim();
+      const tiktokUser = document.getElementById('tiktokUser').value.trim();
+      const instagramUser = document.getElementById('instagramUser').value.trim();
+      const telegramUser = document.getElementById('telegramUser').value.trim();
       const userId = document.getElementById('userId').value.trim();
       const amount = document.getElementById('amount').value.trim();
       const description = document.getElementById('description').value.trim();
 
-      if (!displayName || !username) {
-        alert('Display Name and Username are required!');
+      if (!displayName) {
+        alert('Display Name is required!');
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // Make sure at least one username handle is filled
+      if (!tiktokUser && !instagramUser && !telegramUser) {
+        alert('Please provide at least one username (TikTok, Instagram, or Telegram)!');
         submitBtn.disabled = false;
         return;
       }
@@ -237,20 +249,43 @@
           reports = [];
         }
 
-        reports.push({ display_name: displayName, username, user_id: userId, amount, description });
+        reports.push({
+          display_name: displayName,
+          tiktok_user: tiktokUser,
+          instagram_user: instagramUser,
+          telegram_user: telegramUser,
+          user_id: userId,
+          amount,
+          description
+        });
         const updatedReportsContent = utf8ToBase64(JSON.stringify(reports, null, 2));
 
         statusEl.textContent = 'Updating reports.json...';
-        await updateFile(token, filePathReports, updatedReportsContent, reportsFile.sha, `Add report: @${username}`);
+        await updateFile(token, filePathReports, updatedReportsContent, reportsFile.sha, `Add report: ${displayName}`);
 
         statusEl.textContent = 'Fetching current index.html...';
         const indexFile = await getFile(token, filePathIndex);
         const indexContentStr = base64ToUtf8(indexFile.content.replace(/\n/g, ''));
 
+        // Build the usernames links if present
+        let usernameLinksHTML = '';
+        if (tiktokUser) {
+          const user = tiktokUser.startsWith('@') ? tiktokUser.slice(1) : tiktokUser;
+          usernameLinksHTML += `<p><strong>TikTok User:</strong> <a href="https://www.tiktok.com/@${user}" target="_blank">@${user}</a></p>\n`;
+        }
+        if (instagramUser) {
+          const user = instagramUser.startsWith('@') ? instagramUser.slice(1) : instagramUser;
+          usernameLinksHTML += `<p><strong>Instagram User:</strong> <a href="https://www.instagram.com/${user}" target="_blank">@${user}</a></p>\n`;
+        }
+        if (telegramUser) {
+          const user = telegramUser.startsWith('@') ? telegramUser.slice(1) : telegramUser;
+          usernameLinksHTML += `<p><strong>Telegram User:</strong> <a href="https://t.me/${user}" target="_blank">@${user}</a></p>\n`;
+        }
+
         const newHTMLBlock = `
-<div class="report-card">
+<div class="report-card" style="border:1px solid white; padding:1rem; margin:1rem 0; border-radius:6px;">
   <p><strong>Scammer Display Name:</strong> ${displayName}</p>
-  <p><strong>Scammer Username:</strong> <a href="https://t.me/${username.replace('@', '')}" target="_blank">${username}</a></p>
+  ${usernameLinksHTML}
   <p><strong>Scammer ID:</strong> ${userId}</p>
   <p><strong>Amount:</strong> ${amount}</p>
   <p><strong>Description:</strong> ${description}</p>
@@ -260,11 +295,14 @@
         const updatedIndexContent = utf8ToBase64(updatedIndexContentStr);
 
         statusEl.textContent = 'Updating index.html...';
-        await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: @${username}`);
+        await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: ${displayName}`);
 
         statusEl.textContent = 'Report submitted and website updated!';
+        // Clear inputs
         document.getElementById('displayName').value = '';
-        document.getElementById('username').value = '';
+        document.getElementById('tiktokUser').value = '';
+        document.getElementById('instagramUser').value = '';
+        document.getElementById('telegramUser').value = '';
         document.getElementById('userId').value = '';
         document.getElementById('amount').value = '';
         document.getElementById('description').value = '';
