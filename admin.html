@@ -1,146 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Reports Admin Panel</title>
-<style>
-  body { background: #121212; color: #eee; font-family: Arial, sans-serif; padding: 20px; }
-  label { display: block; margin-top: 10px; }
-  input, textarea { width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: none; }
-  button { margin-top: 15px; padding: 10px 20px; background: #ff3c3c; border: none; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; }
-  button:hover { background: #e53838; }
-  .status { margin-top: 15px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DWC/Time Wasters Admin Panel</title>
+  <style>
+    body {
+      background: #121212;
+      color: #e33e3e;
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      color: #ff6f6f;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    textarea {
+      resize: vertical;
+      height: 100px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #e33e3e;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #7a1a1a;
+      cursor: not-allowed;
+    }
+    #status {
+      margin-top: 1rem;
+      min-height: 1.5rem;
+      font-weight: bold;
+      color: #ff9a9a;
+    }
+    #addAccountBtn {
+      background: #b33e3e;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
+  <h1>DWC/Time Wasters Admin Panel</h1>
 
-<h1>DWC / Time Wasters - Admin Panel</h1>
+  <label for="tokenSelect">Select GitHub Account Token:</label>
+  <select id="tokenSelect"></select>
+  <button id="addAccountBtn">Add New Account Token</button>
 
-<label>GitHub Personal Access Token (PAT):</label>
-<input type="password" id="pat" placeholder="Paste your GitHub PAT here" />
+  <label for="displayName">Scammer Display Name:</label>
+  <input type="text" id="displayName" placeholder="e.g. austin" />
 
-<label>Scammer Display Name (required):</label>
-<input type="text" id="displayName" placeholder="e.g. austin" />
+  <label for="username">Scammer Username (@handle):</label>
+  <input type="text" id="username" placeholder="e.g. @uncarve" />
 
-<label>Scammer Username (required, without @):</label>
-<input type="text" id="username" placeholder="e.g. uncarve" />
+  <label for="userId">Scammer ID:</label>
+  <input type="text" id="userId" placeholder="e.g. 7902801228" />
 
-<label>Scammer ID:</label>
-<input type="text" id="userId" placeholder="e.g. 7902801228" />
+  <label for="amount">Amount (e.g. $300):</label>
+  <input type="text" id="amount" placeholder="e.g. $300" />
 
-<label>Amount:</label>
-<input type="text" id="amount" placeholder="e.g. $300" />
+  <label for="description">Description:</label>
+  <textarea id="description" placeholder="Describe what they did..."></textarea>
 
-<label>Description:</label>
-<textarea id="description" rows="4" placeholder="Describe what they did..."></textarea>
+  <button id="submitBtn">Submit Report</button>
 
-<button id="submitBtn">Add Report</button>
+  <div id="status"></div>
 
-<div class="status" id="status"></div>
+  <script>
+    const repoOwner = 'YOUR_GITHUB_USERNAME'; // Change this
+    const repoName = 'YOUR_REPO_NAME';        // Change this
+    const filePathReports = 'reports.json';
+    const filePathIndex = 'index.html';
 
-<script>
-  const repoOwner = 'tiktoksklf';   // CHANGE THIS
-  const repoName = 'dwc';          // CHANGE THIS
-  const filePath = 'reports.json';
+    const statusEl = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+    const tokenSelect = document.getElementById('tokenSelect');
+    const addAccountBtn = document.getElementById('addAccountBtn');
 
-  const statusEl = document.getElementById('status');
-  const submitBtn = document.getElementById('submitBtn');
-
-  async function getReports(token) {
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-      headers: { Authorization: 'token ' + token }
-    });
-    if (!res.ok) throw new Error('Failed to fetch reports.json: ' + res.statusText);
-    const data = await res.json();
-    return data;
-  }
-
-  async function updateReports(token, sha, contentBase64, message) {
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'token ' + token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: message,
-        content: contentBase64,
-        sha: sha
-      })
-    });
-    if (!res.ok) throw new Error('Failed to update reports.json: ' + res.statusText);
-    return await res.json();
-  }
-
-  submitBtn.onclick = async () => {
-    statusEl.textContent = '';
-    submitBtn.disabled = true;
-
-    const token = document.getElementById('pat').value.trim();
-    const displayName = document.getElementById('displayName').value.trim();
-    const username = document.getElementById('username').value.trim();
-    const userId = document.getElementById('userId').value.trim();
-    const amount = document.getElementById('amount').value.trim();
-    const description = document.getElementById('description').value.trim();
-
-    if (!token) {
-      alert('Please enter your GitHub Personal Access Token!');
-      submitBtn.disabled = false;
-      return;
-    }
-    if (!displayName || !username) {
-      alert('Display Name and Username are required!');
-      submitBtn.disabled = false;
-      return;
+    // Load saved tokens from localStorage
+    function loadTokens() {
+      const saved = localStorage.getItem('githubTokens');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return [];
     }
 
-    try {
-      statusEl.textContent = 'Fetching current reports...';
-      const fileData = await getReports(token);
+    // Save tokens to localStorage
+    function saveTokens(tokens) {
+      localStorage.setItem('githubTokens', JSON.stringify(tokens));
+    }
 
-      // Decode current content
-      const contentStr = atob(fileData.content.replace(/\n/g, ''));
-      let reports = [];
-      try {
-        reports = JSON.parse(contentStr);
-      } catch {
-        reports = [];
+    // Populate the dropdown
+    function populateTokenSelect() {
+      const tokens = loadTokens();
+      tokenSelect.innerHTML = '';
+      tokens.forEach((t, i) => {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Account ${i + 1} - ${t.substr(0,6)}...`;
+        tokenSelect.appendChild(option);
+      });
+      if (tokens.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = 'No tokens saved. Add one!';
+        option.disabled = true;
+        tokenSelect.appendChild(option);
+      }
+    }
+
+    // Prompt to add a new token
+    addAccountBtn.onclick = () => {
+      const token = prompt('Paste your GitHub Personal Access Token:');
+      if (token && token.trim()) {
+        const tokens = loadTokens();
+        tokens.push(token.trim());
+        saveTokens(tokens);
+        populateTokenSelect();
+        alert('Token added! Select it from the dropdown.');
+      }
+    };
+
+    async function getFile(token, path) {
+      const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+        headers: { Authorization: 'token ' + token }
+      });
+      if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.statusText}`);
+      return await res.json();
+    }
+
+    async function updateFile(token, path, contentBase64, sha, message) {
+      const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: message,
+          content: contentBase64,
+          sha: sha
+        })
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to update ${path}: ${res.status} ${res.statusText} - ${text}`);
+      }
+      return await res.json();
+    }
+
+    submitBtn.onclick = async () => {
+      submitBtn.disabled = true;
+      statusEl.textContent = '';
+
+      const tokens = loadTokens();
+      if (tokens.length === 0) {
+        alert('No GitHub tokens saved. Please add an account token first.');
+        submitBtn.disabled = false;
+        return;
+      }
+      const tokenIndex = tokenSelect.value;
+      const token = tokens[tokenIndex];
+
+      const displayName = document.getElementById('displayName').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const userId = document.getElementById('userId').value.trim();
+      const amount = document.getElementById('amount').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      if (!displayName || !username) {
+        alert('Display Name and Username are required!');
+        submitBtn.disabled = false;
+        return;
       }
 
-      // Append new report
-      reports.push({
-        display_name: displayName,
-        username: username,
-        user_id: userId,
-        amount: amount,
-        description: description
-      });
+      try {
+        statusEl.textContent = 'Fetching current reports.json...';
+        const reportsFile = await getFile(token, filePathReports);
+        const reportsContentStr = atob(reportsFile.content.replace(/\n/g, ''));
+        let reports = [];
+        try {
+          reports = JSON.parse(reportsContentStr);
+        } catch { reports = []; }
 
-      // Encode new content
-      const updatedContent = btoa(JSON.stringify(reports, null, 2));
+        reports.push({
+          display_name: displayName,
+          username: username,
+          user_id: userId,
+          amount: amount,
+          description: description
+        });
 
-      statusEl.textContent = 'Updating reports.json on GitHub...';
+        const updatedReportsContent = btoa(JSON.stringify(reports, null, 2));
 
-      await updateReports(token, fileData.sha, updatedContent, `Add report: @${username}`);
+        statusEl.textContent = 'Updating reports.json on GitHub...';
+        await updateFile(token, filePathReports, updatedReportsContent, reportsFile.sha, `Add report: @${username}`);
 
-      statusEl.textContent = 'Report added successfully! Refresh your live site in a minute.';
+        statusEl.textContent = 'Fetching current index.html...';
+        const indexFile = await getFile(token, filePathIndex);
+        const indexContentStr = atob(indexFile.content.replace(/\n/g, ''));
 
-      // Clear form
-      document.getElementById('displayName').value = '';
-      document.getElementById('username').value = '';
-      document.getElementById('userId').value = '';
-      document.getElementById('amount').value = '';
-      document.getElementById('description').value = '';
+        const newLine = `<p>New report added: ${displayName} (${username}), Amount: ${amount}</p>\n`;
+        const updatedIndexContentStr = indexContentStr.replace('</body>', `${newLine}</body>`);
 
-    } catch (error) {
-      statusEl.textContent = 'Error: ' + error.message;
-      console.error(error);
-    }
+        const updatedIndexContent = btoa(unescape(encodeURIComponent(updatedIndexContentStr)));
 
-    submitBtn.disabled = false;
-  };
-</script>
+        statusEl.textContent = 'Updating index.html on GitHub...';
+        await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: @${username}`);
 
+        statusEl.textContent = 'Report added and index.html updated successfully!';
+
+        // Clear form
+        document.getElementById('displayName').value = '';
+        document.getElementById('username').value = '';
+        document.getElementById('userId').value = '';
+        document.getElementById('amount').value = '';
+        document.getElementById('description').value = '';
+
+      } catch (error) {
+        statusEl.textContent = 'Error: ' + error.message;
+        console.error(error);
+      }
+
+      submitBtn.disabled = false;
+    };
+
+    // Initialize dropdown on page load
+    populateTokenSelect();
+  </script>
 </body>
 </html>
