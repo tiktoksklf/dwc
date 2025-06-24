@@ -239,11 +239,11 @@
 
         const newHTMLBlock = `
 <div class="report-card">
-  <p><strong>🚫 Scammer Display Name:</strong> ${displayName}</p>
-  <p><strong>🚫 Scammer Username:</strong> <a href="https://t.me/${username.replace('@', '')}" target="_blank">${username}</a></p>
-  <p><strong>🆔 Scammer ID:</strong> ${userId}</p>
-  <p><strong>💰 Amount:</strong> ${amount}</p>
-  <p><strong>📝 Description:</strong> ${description}</p>
+  <p><strong> Scammer Display Name:</strong> ${displayName}</p>
+  <p><strong> Scammer Username:</strong> <a href="https://t.me/${username.replace('@', '')}" target="_blank">${username}</a></p>
+  <p><strong> Scammer ID:</strong> ${userId}</p>
+  <p><strong> Amount:</strong> ${amount}</p>
+  <p><strong> Description:</strong> ${description}</p>
 </div>\n`;
 
         const updatedIndexContentStr = indexContentStr.replace('</body>', `${newHTMLBlock}</body>`);
