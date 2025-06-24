@@ -97,7 +97,7 @@
 
   <label for="tokenSelect">GitHub Account Token:</label>
   <select id="tokenSelect"></select>
-  <button id="addAccountBtn">➕ Add New Token</button>
+  <button id="addAccountBtn">Add New Token</button>
 
   <label for="displayName"> Scammer Display Name:</label>
   <input type="text" id="displayName" placeholder="e.g. austin" />
@@ -114,7 +114,7 @@
   <label for="description"> Description:</label>
   <textarea id="description" placeholder="Describe what they did..."></textarea>
 
-  <button id="submitBtn">🚀 Submit Report</button>
+  <button id="submitBtn">Submit Report</button>
 
   <div id="status"></div>
 
@@ -252,14 +252,14 @@
         statusEl.textContent = 'Updating index.html...';
         await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: @${username}`);
 
-        statusEl.textContent = '✅ Report submitted and website updated!';
+        statusEl.textContent = 'Report submitted and website updated!';
         document.getElementById('displayName').value = '';
         document.getElementById('username').value = '';
         document.getElementById('userId').value = '';
         document.getElementById('amount').value = '';
         document.getElementById('description').value = '';
       } catch (error) {
-        statusEl.textContent = '❌ Error: ' + error.message;
+        statusEl.textContent = 'Error: ' + error.message;
         console.error(error);
       }
 
