@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Founders - DWC / Time Wasters</title>
-  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&amp;display=swap" rel="stylesheet">
   <style>
     body {
       background-color: black;
@@ -40,6 +37,16 @@
       user-select: none;
     }
 
+    /* Container for founders side by side */
+    .founders-container {
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
     .founder-card {
       background: rgba(22, 22, 22, 0.9);
       border: 1px solid #ccc;
@@ -49,6 +56,8 @@
       max-width: 400px;
       text-align: center;
       user-select: none;
+      flex: 1 1 300px;
+      min-width: 280px;
     }
 
     .pfp {
@@ -82,6 +91,7 @@
       display: flex;
       justify-content: center;
       gap: 1.5rem;
+      flex-wrap: wrap;
     }
 
     .social-links a {
@@ -104,11 +114,25 @@
       border-color: white;
     }
 
-    @media (max-width: 480px) {
-      .founder-card {
-        padding: 1.5rem 2rem;
-        max-width: 90vw;
+    @media (max-width: 900px) {
+      .founders-container {
+        flex-direction: column;
+        gap: 2rem;
       }
+      .founder-card {
+        max-width: 100%;
+        padding: 1.5rem 2rem;
+      }
+      .pfp {
+        width: 140px;
+        height: 140px;
+      }
+      .founder-name {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
       .pfp {
         width: 120px;
         height: 120px;
@@ -122,19 +146,29 @@
 <body>
   <h1>👑 Founders</h1>
 
-  <div class="founder-card" role="region" aria-label="Founder Profile">
-    <img
-      src="https://i.pinimg.com/originals/ef/50/8e/ef508e3624f5ea7236fa81b3deeac953.jpg"
-      alt="@zaso Profile Picture"
-      class="pfp"
-      loading="lazy"
-    />
-    <div class="founder-name">zaso</div>
-    <div class="founder-username">@zaso</div>
-    <div class="social-links">
-      <a href="https://t.me/v2zaso" target="_blank" rel="noopener noreferrer" aria-label="Telegram">Telegram</a>
-      <a href="https://www.tiktok.com/@m1b" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+  <div class="founders-container">
+    <!-- Founder 1 -->
+    <div class="founder-card" role="region" aria-label="Founder Profile">
+      <img src="https://i.pinimg.com/originals/ef/50/8e/ef508e3624f5ea7236fa81b3deeac953.jpg" alt="@zaso Profile Picture" class="pfp" loading="lazy">
+      <div class="founder-name">zaso</div>
+      <div class="founder-username">@zaso</div>
+      <div class="social-links">
+        <a href="https://t.me/v2zaso" target="_blank" rel="noopener noreferrer" aria-label="Telegram">Telegram</a>
+        <a href="https://www.tiktok.com/@m1b" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+      </div>
+    </div>
+
+    <!-- Founder 2 -->
+    <div class="founder-card" role="region" aria-label="Founder Profile">
+      <img src="https://scontent.ftpa1-1.fna.fbcdn.net/v/t1.15752-9/508008164_1065822551638782_2280398568280252639_n.jpg?_nc_cat=101&amp;ccb=1-7&amp;_nc_sid=0024fc&amp;_nc_ohc=oPA1jZ6s_H0Q7kNvwHKK_P2&amp;_nc_oc=Adm3347MRgBEcflNH09G7ORphjGysAO4o6wlFv6Pi_GjS-kOJxc_uUdiTRBTv0USQ9jqEYL6Gq4hC_Ywy1j1_2Lc&amp;_nc_ad=z-m&amp;_nc_cid=0&amp;_nc_zt=23&amp;_nc_ht=scontent.ftpa1-1.fna&amp;oh=03_Q7cD2gGCFzwt8cSh6n-cMjw5llbEetbu0GJPvTcIQUcSOzKcmA&amp;oe=6881AB59" alt="@sphinx Profile Picture" class="pfp" loading="lazy">
+      <div class="founder-name">invaiding(Mod)</div>
+      <div class="founder-username">@invaiding</div>
+      <div class="social-links">
+        <a href="https://www.instagram.com/invaiding/" target="_blank" rel="noopener noreferrer" aria-label="Telegram">Instagram</a>
+        
+      </div>
     </div>
   </div>
-</body>
-</html>
+
+
+</body></html>
