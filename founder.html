@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Founders - DWC / Time Wasters</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: 'Pixelify Sans', monospace;
+      padding: 2rem;
+      background-image: url('https://files.catbox.moe/filqwq.gif');
+      background-size: cover;
+      background-attachment: fixed;
+      position: relative;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: -1;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: white;
+      text-shadow: 0 0 10px white;
+      margin-bottom: 3rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    .founder-card {
+      background: rgba(22, 22, 22, 0.9);
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      padding: 2rem 3rem;
+      box-shadow: 0 0 15px white;
+      max-width: 400px;
+      text-align: center;
+      user-select: none;
+    }
+
+    .pfp {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 0 20px white;
+      margin: 0 auto 1.5rem auto;
+      object-fit: cover;
+      background-color: black;
+    }
+
+    .founder-name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 0 8px white;
+      margin-bottom: 0.25rem;
+    }
+
+    .founder-username {
+      font-size: 1.1rem;
+      color: white;
+      opacity: 1;
+      margin-bottom: 1.5rem;
+      user-select: text;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .social-links a {
+      padding: 10px 20px;
+      border: 1.5px solid white;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      box-shadow: 0 0 10px white;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .social-links a:hover {
+      background: white;
+      color: black;
+      box-shadow: 0 0 20px white;
+      border-color: white;
+    }
+
+    @media (max-width: 480px) {
+      .founder-card {
+        padding: 1.5rem 2rem;
+        max-width: 90vw;
+      }
+      .pfp {
+        width: 120px;
+        height: 120px;
+      }
+      .founder-name {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>👑 Founders</h1>
+
+  <div class="founder-card" role="region" aria-label="Founder Profile">
+    <img
+      src="https://i.pinimg.com/originals/ef/50/8e/ef508e3624f5ea7236fa81b3deeac953.jpg"
+      alt="@zaso Profile Picture"
+      class="pfp"
+      loading="lazy"
+    />
+    <div class="founder-name">zaso</div>
+    <div class="founder-username">@zaso</div>
+    <div class="social-links">
+      <a href="https://t.me/v2zaso" target="_blank" rel="noopener noreferrer" aria-label="Telegram">Telegram</a>
+      <a href="https://www.tiktok.com/@m1b" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+    </div>
+  </div>
+</body>
+</html>
