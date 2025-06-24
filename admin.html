@@ -99,19 +99,19 @@
   <select id="tokenSelect"></select>
   <button id="addAccountBtn">Add New Token</button>
 
-  <label for="displayName"> Scammer Display Name:</label>
+  <label for="displayName">Scammer Display Name:</label>
   <input type="text" id="displayName" placeholder="e.g. austin" />
 
-  <label for="username"> Scammer Username (@handle):</label>
+  <label for="username">Scammer Username (@handle):</label>
   <input type="text" id="username" placeholder="e.g. @uncarve" />
 
-  <label for="userId"> Scammer ID:</label>
+  <label for="userId">Scammer ID:</label>
   <input type="text" id="userId" placeholder="e.g. 7902801228" />
 
-  <label for="amount"> Amount:</label>
+  <label for="amount">Amount:</label>
   <input type="text" id="amount" placeholder="e.g. $300" />
 
-  <label for="description"> Description:</label>
+  <label for="description">Description:</label>
   <textarea id="description" placeholder="Describe what they did..."></textarea>
 
   <button id="submitBtn">Submit Report</button>
@@ -119,6 +119,14 @@
   <div id="status"></div>
 
   <script>
+    // UTF-8 safe base64 encode/decode functions
+    function utf8ToBase64(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+    function base64ToUtf8(str) {
+      return decodeURIComponent(escape(atob(str)));
+    }
+
     const repoOwner = 'tiktoksklf';
     const repoName = 'dwc';
     const filePathReports = 'reports.json';
@@ -221,33 +229,35 @@
       try {
         statusEl.textContent = 'Fetching current reports.json...';
         const reportsFile = await getFile(token, filePathReports);
-        const reportsContentStr = atob(reportsFile.content.replace(/\n/g, ''));
+        const reportsContentStr = base64ToUtf8(reportsFile.content.replace(/\n/g, ''));
         let reports = [];
         try {
           reports = JSON.parse(reportsContentStr);
-        } catch { reports = []; }
+        } catch {
+          reports = [];
+        }
 
         reports.push({ display_name: displayName, username, user_id: userId, amount, description });
-        const updatedReportsContent = btoa(JSON.stringify(reports, null, 2));
+        const updatedReportsContent = utf8ToBase64(JSON.stringify(reports, null, 2));
 
         statusEl.textContent = 'Updating reports.json...';
         await updateFile(token, filePathReports, updatedReportsContent, reportsFile.sha, `Add report: @${username}`);
 
         statusEl.textContent = 'Fetching current index.html...';
         const indexFile = await getFile(token, filePathIndex);
-        const indexContentStr = atob(indexFile.content.replace(/\n/g, ''));
+        const indexContentStr = base64ToUtf8(indexFile.content.replace(/\n/g, ''));
 
         const newHTMLBlock = `
 <div class="report-card">
-  <p><strong> Scammer Display Name:</strong> ${displayName}</p>
-  <p><strong> Scammer Username:</strong> <a href="https://t.me/${username.replace('@', '')}" target="_blank">${username}</a></p>
-  <p><strong> Scammer ID:</strong> ${userId}</p>
-  <p><strong> Amount:</strong> ${amount}</p>
-  <p><strong> Description:</strong> ${description}</p>
+  <p><strong>Scammer Display Name:</strong> ${displayName}</p>
+  <p><strong>Scammer Username:</strong> <a href="https://t.me/${username.replace('@', '')}" target="_blank">${username}</a></p>
+  <p><strong>Scammer ID:</strong> ${userId}</p>
+  <p><strong>Amount:</strong> ${amount}</p>
+  <p><strong>Description:</strong> ${description}</p>
 </div>\n`;
 
         const updatedIndexContentStr = indexContentStr.replace('</body>', `${newHTMLBlock}</body>`);
-        const updatedIndexContent = btoa(unescape(encodeURIComponent(updatedIndexContentStr)));
+        const updatedIndexContent = utf8ToBase64(updatedIndexContentStr);
 
         statusEl.textContent = 'Updating index.html...';
         await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: @${username}`);
