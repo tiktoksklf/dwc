@@ -1,4 +1,14 @@
-<!DOCTYPE html>
+import json
+import subprocess
+import sys
+import os
+
+# Filenames
+REPORTS_JSON = "reports.json"
+INDEX_HTML = "index.html"
+
+# HTML header & footer (same style as your site)
+HTML_HEADER = '''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -11,20 +21,13 @@
       --accent: #ff3c3c;
       --card: #1b1b1b;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: var(--bg);
       color: var(--text);
       font-family: 'Segoe UI', sans-serif;
       padding: 20px;
     }
-
     header {
       display: flex;
       justify-content: space-between;
@@ -32,19 +35,16 @@
       margin-bottom: 40px;
       flex-wrap: wrap;
     }
-
     h1 {
       font-size: 2.4rem;
       color: var(--accent);
       font-weight: bold;
     }
-
     .nav-buttons {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
-
     .nav-buttons button {
       background-color: var(--accent);
       color: #fff;
@@ -55,23 +55,19 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-
     .nav-buttons button:hover {
       background-color: #e53838;
     }
-
     .section {
       max-width: 800px;
       margin: 0 auto;
       margin-top: 20px;
     }
-
     .section h2 {
       font-size: 1.4rem;
       color: var(--accent);
       margin-bottom: 20px;
     }
-
     .report-item {
       background-color: var(--card);
       border-left: 4px solid var(--accent);
@@ -79,25 +75,21 @@
       margin-bottom: 16px;
       border-radius: 10px;
     }
-
     .report-item p {
       margin: 6px 0;
       line-height: 1.5;
     }
-
     .report-item a {
       color: var(--accent);
       font-weight: 500;
       text-decoration: none;
     }
-
     .report-item a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
-
   <header>
     <h1>DWC / Time Wasters</h1>
     <div class="nav-buttons">
@@ -106,27 +98,80 @@
       <button onclick="document.getElementById('reports').scrollIntoView({ behavior: 'smooth' })">View Reports</button>
     </div>
   </header>
-
   <div class="section" id="reports">
     <h2>Reports Section</h2>
+'''
 
-    <div class="report-item">
-      <p><strong>🚫 Scammer Display Name:</strong> austin</p>
-      <p><strong>🚫 Scammer Username:</strong> <a href="https://t.me/uncarve" target="_blank">@uncarve</a></p>
-      <p><strong>🆔 Scammer ID:</strong> 7902801228</p>
-      <p><strong>💰 Amount:</strong> $300</p>
-      <p><strong>📝 Description:</strong> Agreed to send $300 for a voucher deal, disappeared after receiving screenshots and proof. Wasted time, blocked after payment request.</p>
-    </div>
-
-    <div class="report-item">
-      <p><strong>🚫 Scammer Display Name:</strong> jake</p>
-      <p><strong>🚫 Scammer Username:</strong> <a href="https://t.me/sketchyplug" target="_blank">@sketchyplug</a></p>
-      <p><strong>🆔 Scammer ID:</strong> 694201337</p>
-      <p><strong>💰 Amount:</strong> $150</p>
-      <p><strong>📝 Description:</strong> Refused middleman, faked payment receipt and ghosted after confirming product delivery.</p>
-    </div>
-
+HTML_FOOTER = '''
   </div>
-
 </body>
 </html>
+'''
+
+def load_reports():
+    if not os.path.exists(REPORTS_JSON):
+        return []
+    with open(REPORTS_JSON, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def save_reports(reports):
+    with open(REPORTS_JSON, "w", encoding="utf-8") as f:
+        json.dump(reports, f, indent=2, ensure_ascii=False)
+
+def generate_html(reports):
+    report_html = ""
+    for r in reports:
+        username = r.get("username", "").lstrip("@")
+        report_html += f'''
+    <div class="report-item">
+      <p><strong>🚫 Scammer Display Name:</strong> {r.get("display_name", "")}</p>
+      <p><strong>🚫 Scammer Username:</strong> <a href="https://t.me/{username}" target="_blank">@{username}</a></p>
+      <p><strong>🆔 Scammer ID:</strong> {r.get("user_id", "")}</p>
+      <p><strong>💰 Amount:</strong> {r.get("amount", "")}</p>
+      <p><strong>📝 Description:</strong> {r.get("description", "")}</p>
+    </div>
+'''
+    return HTML_HEADER + report_html + HTML_FOOTER
+
+def git_commit_push(message="Update reports"):
+    try:
+        subprocess.run(["git", "add", REPORTS_JSON, INDEX_HTML], check=True)
+        subprocess.run(["git", "commit", "-m", message], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("Changes committed and pushed successfully!")
+    except subprocess.CalledProcessError as e:
+        print("Git command failed:", e)
+
+def add_report():
+    print("Enter new report details:")
+
+    display_name = input("Scammer Display Name: ").strip()
+    username = input("Scammer Username (without @): ").strip().lstrip("@")
+    user_id = input("Scammer ID: ").strip()
+    amount = input("Amount (e.g. $300): ").strip()
+    description = input("Description of what they did: ").strip()
+
+    if not display_name or not username:
+        print("Display Name and Username are required.")
+        return
+
+    new_report = {
+        "display_name": display_name,
+        "username": username,
+        "user_id": user_id,
+        "amount": amount,
+        "description": description
+    }
+
+    reports = load_reports()
+    reports.append(new_report)
+    save_reports(reports)
+
+    html_content = generate_html(reports)
+    with open(INDEX_HTML, "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    git_commit_push(f"Add report: {username}")
+
+if __name__ == "__main__":
+    add_report()
