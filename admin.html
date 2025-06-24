@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DWC/Time Wasters Admin Panel</title>
   <style>
     body {
@@ -64,19 +63,19 @@
   <select id="tokenSelect"></select>
   <button id="addAccountBtn">Add New Account Token</button>
 
-  <label for="displayName">Scammer Display Name:</label>
+  <label for="displayName">🚫 Scammer Display Name:</label>
   <input type="text" id="displayName" placeholder="e.g. austin" />
 
-  <label for="username">Scammer Username (@handle):</label>
+  <label for="username">🚫 Scammer Username (@handle):</label>
   <input type="text" id="username" placeholder="e.g. @uncarve" />
 
-  <label for="userId">Scammer ID:</label>
+  <label for="userId">🆔 Scammer ID:</label>
   <input type="text" id="userId" placeholder="e.g. 7902801228" />
 
-  <label for="amount">Amount (e.g. $300):</label>
+  <label for="amount">💰 Amount:</label>
   <input type="text" id="amount" placeholder="e.g. $300" />
 
-  <label for="description">Description:</label>
+  <label for="description">📝 Description:</label>
   <textarea id="description" placeholder="Describe what they did..."></textarea>
 
   <button id="submitBtn">Submit Report</button>
@@ -84,8 +83,8 @@
   <div id="status"></div>
 
   <script>
-    const repoOwner = 'tiktoksklf'; // Change this
-    const repoName = 'dwc';        // Change this
+    const repoOwner = 'YOUR_GITHUB_USERNAME'; // Replace with your GitHub username
+    const repoName = 'YOUR_REPO_NAME';        // Replace with your repo name
     const filePathReports = 'reports.json';
     const filePathIndex = 'index.html';
 
@@ -94,28 +93,22 @@
     const tokenSelect = document.getElementById('tokenSelect');
     const addAccountBtn = document.getElementById('addAccountBtn');
 
-    // Load saved tokens from localStorage
     function loadTokens() {
       const saved = localStorage.getItem('githubTokens');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return [];
+      return saved ? JSON.parse(saved) : [];
     }
 
-    // Save tokens to localStorage
     function saveTokens(tokens) {
       localStorage.setItem('githubTokens', JSON.stringify(tokens));
     }
 
-    // Populate the dropdown
     function populateTokenSelect() {
       const tokens = loadTokens();
       tokenSelect.innerHTML = '';
       tokens.forEach((t, i) => {
         const option = document.createElement('option');
         option.value = i;
-        option.textContent = `Account ${i + 1} - ${t.substr(0,6)}...`;
+        option.textContent = `Account ${i + 1} - ${t.slice(0, 6)}...`;
         tokenSelect.appendChild(option);
       });
       if (tokens.length === 0) {
@@ -126,7 +119,6 @@
       }
     }
 
-    // Prompt to add a new token
     addAccountBtn.onclick = () => {
       const token = prompt('Paste your GitHub Personal Access Token:');
       if (token && token.trim()) {
@@ -172,13 +164,12 @@
 
       const tokens = loadTokens();
       if (tokens.length === 0) {
-        alert('No GitHub tokens saved. Please add an account token first.');
+        alert('No GitHub tokens saved. Please add one.');
         submitBtn.disabled = false;
         return;
       }
-      const tokenIndex = tokenSelect.value;
-      const token = tokens[tokenIndex];
 
+      const token = tokens[tokenSelect.value];
       const displayName = document.getElementById('displayName').value.trim();
       const username = document.getElementById('username').value.trim();
       const userId = document.getElementById('userId').value.trim();
@@ -200,34 +191,32 @@
           reports = JSON.parse(reportsContentStr);
         } catch { reports = []; }
 
-        reports.push({
-          display_name: displayName,
-          username: username,
-          user_id: userId,
-          amount: amount,
-          description: description
-        });
-
+        reports.push({ display_name: displayName, username, user_id: userId, amount, description });
         const updatedReportsContent = btoa(JSON.stringify(reports, null, 2));
 
-        statusEl.textContent = 'Updating reports.json on GitHub...';
+        statusEl.textContent = 'Updating reports.json...';
         await updateFile(token, filePathReports, updatedReportsContent, reportsFile.sha, `Add report: @${username}`);
 
         statusEl.textContent = 'Fetching current index.html...';
         const indexFile = await getFile(token, filePathIndex);
         const indexContentStr = atob(indexFile.content.replace(/\n/g, ''));
 
-        const newLine = `<p>New report added: ${displayName} (${username}), Amount: ${amount}</p>\n`;
-        const updatedIndexContentStr = indexContentStr.replace('</body>', `${newLine}</body>`);
+        const newHTMLBlock = `
+<div class="report">
+  <p>🚫 <strong>Scammer Display Name:</strong> ${displayName}</p>
+  <p>🚫 <strong>Scammer Username:</strong> <a href="https://t.me/${username.replace('@', '')}" target="_blank">${username}</a></p>
+  <p>🆔 <strong>Scammer ID:</strong> ${userId}</p>
+  <p>💰 <strong>Amount:</strong> ${amount}</p>
+  <p>📝 <strong>Description:</strong> ${description}</p>
+</div>\n`;
 
+        const updatedIndexContentStr = indexContentStr.replace('</body>', `${newHTMLBlock}</body>`);
         const updatedIndexContent = btoa(unescape(encodeURIComponent(updatedIndexContentStr)));
 
-        statusEl.textContent = 'Updating index.html on GitHub...';
+        statusEl.textContent = 'Updating index.html...';
         await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: @${username}`);
 
         statusEl.textContent = 'Report added and index.html updated successfully!';
-
-        // Clear form
         document.getElementById('displayName').value = '';
         document.getElementById('username').value = '';
         document.getElementById('userId').value = '';
@@ -242,7 +231,6 @@
       submitBtn.disabled = false;
     };
 
-    // Initialize dropdown on page load
     populateTokenSelect();
   </script>
 </body>
