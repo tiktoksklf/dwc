@@ -2,132 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DWC / Time Wasters</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --bg: #0e0e0e;
-      --text: #eaeaea;
-      --accent: #ff3c3c;
-      --card: #1b1b1b;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
+      background-color: black;
+      color: white;
+      font-family: 'Pixelify Sans', monospace;
+      padding: 2rem;
+      background-image: url('https://files.catbox.moe/filqwq.gif');
+      background-size: cover;
+      background-attachment: fixed;
+      position: relative;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-      flex-wrap: wrap;
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: -1;
     }
 
     h1 {
-      font-size: 2.4rem;
-      color: var(--accent);
-      font-weight: bold;
+      text-align: center;
+      font-size: 2.5rem;
+      color: white;
+      text-shadow: 0 0 10px white;
+      margin-bottom: 2rem;
     }
 
     .nav-buttons {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
 
-    .nav-buttons button {
-      background-color: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .nav-buttons button:hover {
-      background-color: #e53838;
-    }
-
-    .section {
-      max-width: 800px;
-      margin: 0 auto;
-      margin-top: 20px;
-    }
-
-    .section h2 {
-      font-size: 1.4rem;
-      color: var(--accent);
-      margin-bottom: 20px;
-    }
-
-    .report-item {
-      background-color: var(--card);
-      border-left: 4px solid var(--accent);
-      padding: 15px 20px;
-      margin-bottom: 16px;
-      border-radius: 10px;
-    }
-
-    .report-item p {
-      margin: 6px 0;
-      line-height: 1.5;
-    }
-
-    .report-item a {
-      color: var(--accent);
-      font-weight: 500;
+    .nav-buttons a {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid white;
+      color: white;
       text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px white;
     }
 
-    .report-item a:hover {
+    .nav-buttons a:hover {
+      background: white;
+      color: black;
+      box-shadow: 0 0 20px white;
+    }
+
+    .report-card {
+      background-color: rgba(22, 22, 22, 0.9);
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 15px white;
+    }
+
+    .report-card p {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .report-card a {
+      color: white;
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
+  <h1>░▒▓█ DWC / TIME WASTERS █▓▒░</h1>
 
-  <header>
-    <h1>DWC / Time Wasters</h1>
-    <div class="nav-buttons">
-      <button onclick="alert('Founder list coming soon.')">Founders</button>
-      <button onclick="alert('Report form coming soon.')">Add Report</button>
-      <button onclick="document.getElementById('reports').scrollIntoView({ behavior: 'smooth' })">View Reports</button>
-    </div>
-  </header>
-
-  <div class="section" id="reports">
-    <h2>Reports Section</h2>
-
-    <div class="report-item">
-      <p><strong>ð« Scammer Display Name:</strong> austin</p>
-      <p><strong>ð« Scammer Username:</strong> <a href="https://t.me/uncarve" target="_blank">@uncarve</a></p>
-      <p><strong>ð Scammer ID:</strong> 7902801228</p>
-      <p><strong>ð° Amount:</strong> $300</p>
-      <p><strong>ð Description:</strong> Agreed to send $300 for a voucher deal, disappeared after receiving screenshots and proof. Wasted time, blocked after payment request.</p>
-    </div>
-
-    <div class="report-item">
-      <p><strong>ð« Scammer Display Name:</strong> jake</p>
-      <p><strong>ð« Scammer Username:</strong> <a href="https://t.me/sketchyplug" target="_blank">@sketchyplug</a></p>
-      <p><strong>ð Scammer ID:</strong> 694201337</p>
-      <p><strong>ð° Amount:</strong> $150</p>
-      <p><strong>ð Description:</strong> Refused middleman, faked payment receipt and ghosted after confirming product delivery.</p>
-    </div>
-
+  <div class="nav-buttons">
+    <a href="https://t.me/zasostockv1" target="_blank">📩 Report</a>
+    <a href="founder.html">👑 Founders</a>
   </div>
 
-<p>New report added: 23324342 (123434r212314), Amount: 231412342341</p>
+  <div class="report-card">
+    <p><strong>🚫 Scammer Display Name:</strong> austin</p>
+    <p><strong>🚫 Scammer Username:</strong> <a href="https://t.me/uncarve" target="_blank">@uncarve</a></p>
+    <p><strong>🆔 Scammer ID:</strong> 7902801228</p>
+    <p><strong>💰 Amount:</strong> $300</p>
+    <p><strong>📝 Description:</strong> Agreed to send $300 for a voucher deal, disappeared after receiving screenshots and proof. Wasted time, blocked after payment request.</p>
+  </div>
+
+  <div class="report-card">
+    <p><strong>🚫 Scammer Display Name:</strong> jake</p>
+    <p><strong>🚫 Scammer Username:</strong> <a href="https://t.me/sketchyplug" target="_blank">@sketchyplug</a></p>
+    <p><strong>🆔 Scammer ID:</strong> 694201337</p>
+    <p><strong>💰 Amount:</strong> $150</p>
+    <p><strong>📝 Description:</strong> Refused middleman, faked payment receipt and ghosted after confirming product delivery.</p>
+  </div>
 </body>
 </html>
