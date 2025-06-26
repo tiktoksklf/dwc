@@ -81,198 +81,191 @@
   <button id="addAccountBtn">Add New Token</button>
 
   <label>Scammer Display Name:</label>
-  <input type="text" id="displayName" placeholder="e.g. austin" />
+  <input type="text" id="displayName" placeholder="e.g. austin">
 
   <label>TikTok User (@):</label>
-  <input type="text" id="tiktokUser" placeholder="e.g. @uncarve" />
+  <input type="text" id="tiktokUser" placeholder="e.g. @uncarve">
 
   <label>Instagram User (@):</label>
-  <input type="text" id="instagramUser" placeholder="e.g. @uncarve" />
+  <input type="text" id="instagramUser" placeholder="e.g. @uncarve">
 
   <label>Telegram User (@):</label>
-  <input type="text" id="telegramUser" placeholder="e.g. @uncarve" />
+  <input type="text" id="telegramUser" placeholder="e.g. @uncarve">
 
   <label>Scammer ID:</label>
-  <input type="text" id="userId" placeholder="e.g. 7902801228" />
+  <input type="text" id="userId" placeholder="e.g. 7902801228">
 
   <label>Amount:</label>
-  <input type="text" id="amount" placeholder="e.g. $300" />
+  <input type="text" id="amount" placeholder="e.g. $300">
 
   <label>Description:</label>
   <textarea id="description" placeholder="Describe what they did..."></textarea>
 
   <label>Proof Link:</label>
-  <input type="text" id="proof" placeholder="e.g. https://imgur.com/xxx" />
+  <input type="text" id="proof" placeholder="e.g. https://imgur.com/xxx">
 
   <button id="submitBtn">Submit Report</button>
 
   <div id="status"></div>
 
 <script>
-  // UTF8 <-> Base64 helpers
-  function utf8ToBase64(str) {
-    return btoa(unescape(encodeURIComponent(str)));
-  }
-  function base64ToUtf8(str) {
-    return decodeURIComponent(escape(atob(str)));
-  }
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
 
-  // GitHub repo info - customize these to your repo
-  const repoOwner = 'tiktoksklf';
-  const repoName = 'dwc';
-  const filePath = 'index.html';
+const repoOwner = 'tiktoksklf';
+const repoName = 'dwc';
+const filePath = 'index.html';
 
-  const tokenSelect = document.getElementById('tokenSelect');
-  const statusEl = document.getElementById('status');
-  const submitBtn = document.getElementById('submitBtn');
-  const addAccountBtn = document.getElementById('addAccountBtn');
+const tokenSelect = document.getElementById('tokenSelect');
+const statusEl = document.getElementById('status');
+const submitBtn = document.getElementById('submitBtn');
+const addAccountBtn = document.getElementById('addAccountBtn');
 
-  // Load saved GitHub tokens from localStorage
-  function loadTokens() {
-    const saved = localStorage.getItem('githubTokens');
-    return saved ? JSON.parse(saved) : [];
+function loadTokens() {
+  const saved = localStorage.getItem('githubTokens');
+  return saved ? JSON.parse(saved) : [];
+}
+function saveTokens(tokens) {
+  localStorage.setItem('githubTokens', JSON.stringify(tokens));
+}
+function populateTokenSelect() {
+  const tokens = loadTokens();
+  tokenSelect.innerHTML = '';
+  tokens.forEach((t, i) => {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = `Account ${i + 1} - ${t.slice(0, 6)}...`;
+    tokenSelect.appendChild(option);
+  });
+  if (tokens.length === 0) {
+    const option = document.createElement('option');
+    option.textContent = 'No tokens saved. Add one!';
+    option.disabled = true;
+    tokenSelect.appendChild(option);
   }
-  // Save tokens to localStorage
-  function saveTokens(tokens) {
-    localStorage.setItem('githubTokens', JSON.stringify(tokens));
-  }
-  // Populate token dropdown select
-  function populateTokenSelect() {
+}
+addAccountBtn.onclick = () => {
+  const token = prompt('Paste your GitHub Token:');
+  if (token) {
     const tokens = loadTokens();
-    tokenSelect.innerHTML = '';
-    if (tokens.length === 0) {
-      const option = document.createElement('option');
-      option.textContent = 'No tokens saved. Add one!';
-      option.disabled = true;
-      tokenSelect.appendChild(option);
-    } else {
-      tokens.forEach((t, i) => {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = `Account ${i + 1} - ${t.slice(0, 6)}...`;
-        tokenSelect.appendChild(option);
-      });
-    }
+    tokens.push(token.trim());
+    saveTokens(tokens);
+    populateTokenSelect();
+  }
+};
+
+async function getFile(token, path) {
+  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+    headers: { Authorization: 'token ' + token }
+  });
+  if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.statusText}`);
+  return await res.json();
+}
+async function updateFile(token, path, contentBase64, sha, message) {
+  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + token,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: message,
+      content: contentBase64,
+      sha: sha
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update ${path}: ${res.status} ${res.statusText} - ${text}`);
+  }
+  return await res.json();
+}
+
+submitBtn.onclick = async () => {
+  submitBtn.disabled = true;
+  statusEl.textContent = '';
+
+  const tokens = loadTokens();
+  if (tokens.length === 0) {
+    alert('No GitHub tokens saved.');
+    submitBtn.disabled = false;
+    return;
   }
 
-  addAccountBtn.onclick = () => {
-    const token = prompt('Paste your GitHub Token:');
-    if (token) {
-      const tokens = loadTokens();
-      tokens.push(token.trim());
-      saveTokens(tokens);
-      populateTokenSelect();
-    }
-  };
+  const token = tokens[tokenSelect.value];
+  const displayName = document.getElementById('displayName').value.trim();
+  const tiktokUser = document.getElementById('tiktokUser').value.trim();
+  const instagramUser = document.getElementById('instagramUser').value.trim();
+  const telegramUser = document.getElementById('telegramUser').value.trim();
+  const userId = document.getElementById('userId').value.trim();
+  const amount = document.getElementById('amount').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const proof = document.getElementById('proof').value.trim();
+  const date = new Date().toLocaleDateString();
 
-  // Fetch file content from GitHub
-  async function getFile(token, path) {
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
-      headers: { Authorization: 'token ' + token }
-    });
-    if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.statusText}`);
-    return await res.json();
-  }
-  // Update file content on GitHub
-  async function updateFile(token, path, contentBase64, sha, message) {
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'token ' + token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: message,
-        content: contentBase64,
-        sha: sha
-      })
-    });
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Failed to update ${path}: ${res.status} ${res.statusText} - ${text}`);
-    }
-    return await res.json();
+  if (!displayName) {
+    alert('Display Name is required!');
+    submitBtn.disabled = false;
+    return;
   }
 
-  submitBtn.onclick = async () => {
-    submitBtn.disabled = true;
-    statusEl.textContent = '';
+  try {
+    statusEl.textContent = 'Fetching current file...';
+    const file = await getFile(token, filePath);
+    const contentStr = base64ToUtf8(file.content.replace(/\n/g, ''));
 
-    const tokens = loadTokens();
-    if (tokens.length === 0) {
-      alert('No GitHub tokens saved.');
-      submitBtn.disabled = false;
-      return;
-    }
-
-    const token = tokens[tokenSelect.value];
-    const displayName = document.getElementById('displayName').value.trim();
-    const tiktokUser = document.getElementById('tiktokUser').value.trim();
-    const instagramUser = document.getElementById('instagramUser').value.trim();
-    const telegramUser = document.getElementById('telegramUser').value.trim();
-    const userId = document.getElementById('userId').value.trim();
-    const amount = document.getElementById('amount').value.trim();
-    const description = document.getElementById('description').value.trim();
-    const proof = document.getElementById('proof').value.trim();
-    const date = new Date().toLocaleDateString();
-
-    if (!displayName) {
-      alert('Display Name is required!');
-      submitBtn.disabled = false;
-      return;
-    }
-
-    try {
-      statusEl.textContent = 'Fetching current file...';
-      const file = await getFile(token, filePath);
-      const contentStr = base64ToUtf8(file.content);
-
-      // Build new report HTML block consistent with your reports page style
-      const reportBlock = `
+    // Build new report card HTML with your style
+    const reportBlock = `
       <div class="report-card">
         <div class="report-header">
           <h3>${displayName} <span class="status-new">[NEW]</span></h3>
           <div class="amount">${amount}</div>
         </div>
-        ${userId ? `<div class="meta">ID: ${userId}</div>` : ''}
+        <div class="meta">ID: ${userId}</div>
         ${telegramUser ? `<div class="meta">Telegram: <a href="https://t.me/${telegramUser}" style="color:#93c5fd;">@${telegramUser}</a></div>` : ''}
-        ${instagramUser ? `<div class="meta">Instagram: <a href="https://www.instagram.com/${instagramUser}" style="color:#93c5fd;">@${instagramUser}</a></div>` : ''}
         ${tiktokUser ? `<div class="meta">TikTok: <a href="https://www.tiktok.com/${tiktokUser}" style="color:#93c5fd;">@${tiktokUser}</a></div>` : ''}
+        ${instagramUser ? `<div class="meta">Instagram: <a href="https://www.instagram.com/${instagramUser}" style="color:#93c5fd;">@${instagramUser}</a></div>` : ''}
         <p class="desc">${description}</p>
+        ${proof ? `<div class="meta">Proof: <a href="${proof}" target="_blank" style="color:#93c5fd;">View</a></div>` : ''}
         <div class="meta">Date: ${date}</div>
-      </div>\n`;
+      </div>`;
 
-      // Insert new report block inside .report-grid container at the end
-      const updatedContent = contentStr.replace(/(<div class="report-grid">)([\s\S]*?)(<\/div>)/i, (match, p1, p2, p3) => {
-        return p1 + p2 + reportBlock + p3;
-      });
+    // Insert new report just before the closing </div> of report-grid container
+    const updatedContent = contentStr.replace(
+      /(<div class="report-grid">)([\s\S]*?)(<\/div>)/,
+      (match, startTag, innerContent, endTag) => `${startTag}\n${reportBlock}\n${innerContent}${endTag}`
+    );
 
-      const encodedContent = utf8ToBase64(updatedContent);
+    const encodedContent = utf8ToBase64(updatedContent);
 
-      statusEl.textContent = 'Uploading...';
-      await updateFile(token, filePath, encodedContent, file.sha, `Added report: ${displayName}`);
+    statusEl.textContent = 'Uploading...';
+    await updateFile(token, filePath, encodedContent, file.sha, `Added report: ${displayName}`);
 
-      statusEl.textContent = '✅ Report Added!';
+    statusEl.textContent = '✅ Report Added!';
 
-      // Clear inputs
-      document.getElementById('displayName').value = '';
-      document.getElementById('tiktokUser').value = '';
-      document.getElementById('instagramUser').value = '';
-      document.getElementById('telegramUser').value = '';
-      document.getElementById('userId').value = '';
-      document.getElementById('amount').value = '';
-      document.getElementById('description').value = '';
-      document.getElementById('proof').value = '';
-    } catch (err) {
-      statusEl.textContent = '❌ Error: ' + err.message;
-      console.error(err);
-    }
+    // Clear input fields after successful submission
+    document.getElementById('displayName').value = '';
+    document.getElementById('tiktokUser').value = '';
+    document.getElementById('instagramUser').value = '';
+    document.getElementById('telegramUser').value = '';
+    document.getElementById('userId').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('proof').value = '';
 
-    submitBtn.disabled = false;
-  };
+  } catch (err) {
+    statusEl.textContent = '❌ Error: ' + err.message;
+    console.error(err);
+  }
 
-  // Initialize token dropdown on page load
-  populateTokenSelect();
+  submitBtn.disabled = false;
+};
+
+populateTokenSelect();
 </script>
 
 </body>
