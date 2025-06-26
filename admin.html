@@ -242,8 +242,10 @@
         <div class="meta">Date: ${date}</div>
       </div>\n`;
 
-      // Insert new report block right after nav-buttons div
-      const updatedContent = contentStr.replace(/(<div class="nav-buttons">[\s\S]*?<\/div>)/i, (match) => `${match}\n${reportBlock}`);
+      // Insert new report block inside .report-grid container at the end
+      const updatedContent = contentStr.replace(/(<div class="report-grid">)([\s\S]*?)(<\/div>)/i, (match, p1, p2, p3) => {
+        return p1 + p2 + reportBlock + p3;
+      });
 
       const encodedContent = utf8ToBase64(updatedContent);
 
