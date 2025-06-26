@@ -278,9 +278,6 @@
           usernameLinksHTML += `<p><strong>Telegram User:</strong> <a href="https://t.me/${user}" target="_blank">@${user}</a></p>\n`;
         }
 
-        // Log to confirm usernames built
-        console.log('User links HTML:', usernameLinksHTML);
-
         const newHTMLBlock = `
 <div class="report-card" style="border:1px solid white; padding:1rem; margin:1rem 0; border-radius:6px;">
   <p><strong>Scammer Display Name:</strong> ${displayName}</p>
@@ -290,8 +287,10 @@
   <p><strong>Description:</strong> ${description}</p>
 </div>\n`;
 
-        // Insert new report right after opening <body> tag so it appears at the top
-        const updatedIndexContentStr = indexContentStr.replace(/<body[^>]*>/i, match => `${match}\n${newHTMLBlock}`);
+        // Insert new report block **after** the nav-buttons div so header/nav stay on top
+        const updatedIndexContentStr = indexContentStr.replace(/(<div class="nav-buttons">[\s\S]*?<\/div>)/i, (match) => {
+          return `${match}\n${newHTMLBlock}`;
+        });
 
         const updatedIndexContent = utf8ToBase64(updatedIndexContentStr);
 
