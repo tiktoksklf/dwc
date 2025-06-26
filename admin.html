@@ -1,5 +1,4 @@
-<html lang="en">
-<head>
+<html lang="en"><head>
   <meta charset="UTF-8">
   <title>DWC / Admin Panel</title>
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&amp;display=swap" rel="stylesheet">
@@ -90,10 +89,7 @@
   <h1>░▒▓█ ADMIN PANEL █▓▒░</h1>
 
   <label for="tokenSelect">GitHub Account Token:</label>
-  <select id="tokenSelect">
-    <option value="0">Account 1 - github...</option>
-    <option value="1">Account 2 - github...</option>
-  </select>
+  <select id="tokenSelect"><option value="0">Account 1 - github...</option></select>
   <button id="addAccountBtn">Add New Token</button>
 
   <label for="displayName">Scammer Display Name:</label>
@@ -231,7 +227,7 @@
         return;
       }
 
-      // Make sure at least one username handle is filled
+      // Require at least one username handle filled
       if (!tiktokUser && !instagramUser && !telegramUser) {
         alert('Please provide at least one username (TikTok, Instagram, or Telegram)!');
         submitBtn.disabled = false;
@@ -282,6 +278,9 @@
           usernameLinksHTML += `<p><strong>Telegram User:</strong> <a href="https://t.me/${user}" target="_blank">@${user}</a></p>\n`;
         }
 
+        // DEBUG: Log the username links HTML to verify Instagram is included
+        console.log('User links HTML:', usernameLinksHTML);
+
         const newHTMLBlock = `
 <div class="report-card" style="border:1px solid white; padding:1rem; margin:1rem 0; border-radius:6px;">
   <p><strong>Scammer Display Name:</strong> ${displayName}</p>
@@ -291,7 +290,8 @@
   <p><strong>Description:</strong> ${description}</p>
 </div>\n`;
 
-        const updatedIndexContentStr = indexContentStr.replace('</body>', `${newHTMLBlock}</body>`);
+        // Use case-insensitive regex to reliably replace </body>
+        const updatedIndexContentStr = indexContentStr.replace(/<\/body>/i, `${newHTMLBlock}</body>`);
         const updatedIndexContent = utf8ToBase64(updatedIndexContentStr);
 
         statusEl.textContent = 'Updating index.html...';
@@ -316,5 +316,5 @@
 
     populateTokenSelect();
   </script>
-</body>
-</html>
+
+</body></html>
