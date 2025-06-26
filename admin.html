@@ -227,7 +227,6 @@
         return;
       }
 
-      // Require at least one username handle filled
       if (!tiktokUser && !instagramUser && !telegramUser) {
         alert('Please provide at least one username (TikTok, Instagram, or Telegram)!');
         submitBtn.disabled = false;
@@ -245,7 +244,8 @@
           reports = [];
         }
 
-        reports.push({
+        // Add new report at the start of the array (to keep newest on top)
+        reports.unshift({
           display_name: displayName,
           tiktok_user: tiktokUser,
           instagram_user: instagramUser,
@@ -263,7 +263,7 @@
         const indexFile = await getFile(token, filePathIndex);
         const indexContentStr = base64ToUtf8(indexFile.content.replace(/\n/g, ''));
 
-        // Build the usernames links if present
+        // Build username links HTML
         let usernameLinksHTML = '';
         if (tiktokUser) {
           const user = tiktokUser.startsWith('@') ? tiktokUser.slice(1) : tiktokUser;
@@ -278,7 +278,7 @@
           usernameLinksHTML += `<p><strong>Telegram User:</strong> <a href="https://t.me/${user}" target="_blank">@${user}</a></p>\n`;
         }
 
-        // DEBUG: Log the username links HTML to verify Instagram is included
+        // Log to confirm usernames built
         console.log('User links HTML:', usernameLinksHTML);
 
         const newHTMLBlock = `
@@ -290,14 +290,16 @@
   <p><strong>Description:</strong> ${description}</p>
 </div>\n`;
 
-        // Use case-insensitive regex to reliably replace </body>
-        const updatedIndexContentStr = indexContentStr.replace(/<\/body>/i, `${newHTMLBlock}</body>`);
+        // Insert new report right after opening <body> tag so it appears at the top
+        const updatedIndexContentStr = indexContentStr.replace(/<body[^>]*>/i, match => `${match}\n${newHTMLBlock}`);
+
         const updatedIndexContent = utf8ToBase64(updatedIndexContentStr);
 
         statusEl.textContent = 'Updating index.html...';
         await updateFile(token, filePathIndex, updatedIndexContent, indexFile.sha, `Update index.html with new report: ${displayName}`);
 
         statusEl.textContent = 'Report submitted and website updated!';
+
         // Clear inputs
         document.getElementById('displayName').value = '';
         document.getElementById('tiktokUser').value = '';
@@ -306,6 +308,7 @@
         document.getElementById('userId').value = '';
         document.getElementById('amount').value = '';
         document.getElementById('description').value = '';
+
       } catch (error) {
         statusEl.textContent = 'Error: ' + error.message;
         console.error(error);
