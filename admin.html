@@ -218,7 +218,7 @@ submitBtn.onclick = async () => {
     const contentStr = base64ToUtf8(file.content.replace(/\n/g, ''));
 
     const reportBlock = `
-<div class="report-card">
+<div class="report-card" style="border:1px solid white; padding:1rem; margin:1rem 0; border-radius:6px;">
   <p><strong>Scammer Display Name:</strong> ${displayName} <span style="color:lime;">[NEW]</span></p>
   ${tiktokUser ? `<p><strong>TikTok User:</strong> <a href="https://www.tiktok.com/${tiktokUser}" target="_blank">${tiktokUser}</a></p>` : ''}
   ${instagramUser ? `<p><strong>Instagram User:</strong> <a href="https://www.instagram.com/${instagramUser}" target="_blank">${instagramUser}</a></p>` : ''}
@@ -230,9 +230,7 @@ submitBtn.onclick = async () => {
   <p><strong>Date:</strong> ${date}</p>
 </div>\n`;
 
-    const updatedContent = contentStr
-      .replace(/<div class="report-card">[\s\S]*?\[NEW\][\s\S]*?<\/div>\n?/, '') // Remove old NEW
-      .replace(/(<div class="nav-buttons">[\s\S]*?<\/div>)/i, (match) => `${match}\n${reportBlock}`);
+    const updatedContent = contentStr.replace(/(<div class="nav-buttons">[\s\S]*?<\/div>)/i, (match) => `${match}\n${reportBlock}`);
 
     const encodedContent = utf8ToBase64(updatedContent);
 
